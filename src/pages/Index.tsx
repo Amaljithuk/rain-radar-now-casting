@@ -258,8 +258,12 @@ const Index = () => {
                       alt="Precipitation radar map"
                       className="w-full h-64 object-cover rounded-lg border border-gray-200"
                       onError={(e) => {
-                        e.target.style.display = 'none';
-                        e.target.nextSibling.style.display = 'block';
+                        const target = e.target as HTMLImageElement;
+                        target.style.display = 'none';
+                        const nextElement = target.nextSibling as HTMLElement;
+                        if (nextElement) {
+                          nextElement.style.display = 'block';
+                        }
                       }}
                     />
                     <div 
