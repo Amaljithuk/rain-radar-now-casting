@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Search, MapPin, Cloud, CloudRain, Sun, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -13,8 +12,8 @@ const Index = () => {
   const [radarImageUrl, setRadarImageUrl] = useState('');
   const [error, setError] = useState('');
 
-  // You'll need to replace this with your actual OpenWeatherMap API key
-  const API_KEY = 'your-openweathermap-api-key';
+  // OpenWeatherMap API key
+  const API_KEY = 'ef3bf35854d224a7d03bc429460db0df';
 
   const getCoordinates = async (city) => {
     const response = await fetch(
