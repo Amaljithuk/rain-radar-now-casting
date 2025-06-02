@@ -13,7 +13,7 @@ const Index = () => {
   const [error, setError] = useState('');
 
   // OpenWeatherMap API key
-  const API_KEY = 'ef3bf35854d224a7d03bc429460db0df';
+  const API_KEY = 'eb6ea4ea5d79cd9be70ba4fb6dab30fb';
 
   const getCoordinates = async (city) => {
     const response = await fetch(
