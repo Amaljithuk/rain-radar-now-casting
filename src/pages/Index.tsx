@@ -19,7 +19,19 @@ const Index = () => {
     const response = await fetch(
       `https://api.openweathermap.org/geo/1.0/direct?q=${encodeURIComponent(city)}&limit=1&appid=${API_KEY}`
     );
+    
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error('Geocoding API Error:', errorData);
+      if (response.status === 401) {
+        throw new Error('API key is invalid or expired. Please check your OpenWeatherMap API key.');
+      }
+      throw new Error(`Geocoding failed: ${errorData.message || 'Unknown error'}`);
+    }
+    
     const data = await response.json();
+    console.log('Geocoding response:', data);
+    
     if (data.length === 0) throw new Error('City not found');
     return { lat: data[0].lat, lon: data[0].lon, name: data[0].name, country: data[0].country };
   };
@@ -28,6 +40,16 @@ const Index = () => {
     const response = await fetch(
       `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=metric`
     );
+    
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error('Weather API Error:', errorData);
+      if (response.status === 401) {
+        throw new Error('API key is invalid or expired. Please check your OpenWeatherMap API key.');
+      }
+      throw new Error(`Weather data failed: ${errorData.message || 'Unknown error'}`);
+    }
+    
     const data = await response.json();
     return {
       status: data.weather[0].main,
@@ -83,10 +105,12 @@ const Index = () => {
       setRadarImageUrl(radarUrl);
     } catch (err) {
       console.error('Error fetching weather data:', err);
-      if (err.message === 'City not found') {
+      if (err.message.includes('API key')) {
+        setError('Invalid API key. Please verify your OpenWeatherMap API key is correct and active.');
+      } else if (err.message === 'City not found') {
         setError('City not found. Please check the spelling and try again.');
       } else {
-        setError('Weather data unavailable. Please try again later.');
+        setError(`Error: ${err.message}`);
       }
     } finally {
       setIsLoading(false);
