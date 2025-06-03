@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Search, MapPin, Cloud, CloudRain, Sun, Loader2 } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Search, MapPin, Cloud, CloudRain, Sun, Loader2, RotateCcw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -126,14 +126,14 @@ const Index = () => {
 
   const getRainfallStatus = (rainfall, status) => {
     if (rainfall > 0) {
-      if (rainfall < 0.5) return { text: `Light rain: ${rainfall} mm/h`, icon: CloudRain, color: 'text-blue-500' };
-      if (rainfall < 2) return { text: `Moderate rain: ${rainfall} mm/h`, icon: CloudRain, color: 'text-blue-600' };
-      return { text: `Heavy rain: ${rainfall} mm/h`, icon: CloudRain, color: 'text-blue-700' };
+      if (rainfall < 0.5) return { text: `Light rain: ${rainfall} mm/h`, icon: CloudRain, color: 'text-blue-600' };
+      if (rainfall < 2) return { text: `Moderate rain: ${rainfall} mm/h`, icon: CloudRain, color: 'text-blue-700' };
+      return { text: `Heavy rain: ${rainfall} mm/h`, icon: CloudRain, color: 'text-blue-800' };
     }
     
-    if (status === 'Rain') return { text: 'Light rain detected', icon: CloudRain, color: 'text-blue-500' };
-    if (status === 'Drizzle') return { text: 'Drizzle detected', icon: CloudRain, color: 'text-blue-400' };
-    if (status === 'Clouds') return { text: 'No rain - Cloudy', icon: Cloud, color: 'text-gray-500' };
+    if (status === 'Rain') return { text: 'Light rain detected', icon: CloudRain, color: 'text-blue-600' };
+    if (status === 'Drizzle') return { text: 'Drizzle detected', icon: CloudRain, color: 'text-blue-500' };
+    if (status === 'Clouds') return { text: 'No rain - Cloudy', icon: Cloud, color: 'text-gray-600' };
     return { text: 'No rain detected', icon: Sun, color: 'text-yellow-500' };
   };
 
@@ -143,64 +143,191 @@ const Index = () => {
     }
   };
 
+  const getBackgroundGradient = () => {
+    if (!weatherData) return 'from-gray-50 via-blue-50 to-blue-100';
+    
+    if (weatherData.rainfall > 2) return 'from-blue-100 via-blue-200 to-blue-300';
+    if (weatherData.rainfall > 0) return 'from-blue-50 via-blue-100 to-blue-200';
+    if (weatherData.status === 'Clouds') return 'from-gray-50 via-gray-100 to-blue-100';
+    return 'from-white via-blue-50 to-blue-100';
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-100 relative overflow-hidden">
-      {/* Animated background raindrops */}
+    <div className={`min-h-screen bg-gradient-to-br ${getBackgroundGradient()} relative overflow-hidden transition-all duration-1000`}>
+      {/* Animated raindrops */}
       <div className="absolute inset-0 pointer-events-none">
-        {[...Array(20)].map((_, i) => (
+        {[...Array(25)].map((_, i) => (
           <div
             key={i}
-            className="absolute w-1 h-8 bg-blue-300 opacity-20 animate-pulse"
+            className="absolute w-0.5 h-6 bg-blue-400 opacity-30 animate-pulse raindrop"
             style={{
               left: `${Math.random() * 100}%`,
               animationDelay: `${Math.random() * 3}s`,
               animationDuration: `${2 + Math.random() * 2}s`,
-              transform: 'rotate(15deg)'
+              transform: 'rotate(15deg)',
+              animation: `raindrop ${2 + Math.random() * 2}s linear infinite`
             }}
           />
         ))}
       </div>
 
+      {/* Floating clouds */}
+      <div className="absolute inset-0 pointer-events-none">
+        {[...Array(3)].map((_, i) => (
+          <div
+            key={i}
+            className="absolute text-6xl opacity-10 text-gray-400 cloud-float"
+            style={{
+              top: `${20 + i * 25}%`,
+              left: `${-10 + i * 40}%`,
+              animationDelay: `${i * 5}s`,
+              animation: `cloudFloat 20s linear infinite`
+            }}
+          >
+            ☁️
+          </div>
+        ))}
+      </div>
+
+      <style jsx>{`
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Inter:wght@400;500;600&display=swap');
+        
+        @keyframes raindrop {
+          0% {
+            transform: translateY(-100vh) rotate(15deg);
+            opacity: 0;
+          }
+          10% {
+            opacity: 0.3;
+          }
+          90% {
+            opacity: 0.3;
+          }
+          100% {
+            transform: translateY(100vh) rotate(15deg);
+            opacity: 0;
+          }
+        }
+        
+        @keyframes cloudFloat {
+          0% {
+            transform: translateX(-50px);
+          }
+          100% {
+            transform: translateX(calc(100vw + 50px));
+          }
+        }
+        
+        @keyframes candleFlicker {
+          0%, 100% { opacity: 1; transform: scale(1) rotate(0deg); }
+          25% { opacity: 0.8; transform: scale(1.05) rotate(1deg); }
+          50% { opacity: 0.9; transform: scale(0.95) rotate(-1deg); }
+          75% { opacity: 0.85; transform: scale(1.02) rotate(0.5deg); }
+        }
+        
+        @keyframes shake {
+          0%, 100% { transform: translateX(0); }
+          25% { transform: translateX(-2px); }
+          75% { transform: translateX(2px); }
+        }
+        
+        @keyframes fadeInRadar {
+          from { opacity: 0; transform: scale(0.95); }
+          to { opacity: 1; transform: scale(1); }
+        }
+        
+        .candle-flicker {
+          animation: candleFlicker 0.5s ease-in-out infinite;
+        }
+        
+        .shake {
+          animation: shake 0.5s ease-in-out;
+        }
+        
+        .fade-in-radar {
+          animation: fadeInRadar 1s ease-out;
+        }
+        
+        .glass-morphism {
+          backdrop-filter: blur(10px);
+          background: rgba(255, 255, 255, 0.8);
+          border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .card-3d {
+          transform-style: preserve-3d;
+          perspective: 1000px;
+          transition: transform 0.3s ease;
+        }
+        
+        .card-3d:hover {
+          transform: perspective(1000px) rotateX(5deg) rotateY(-5deg) translateZ(20px);
+        }
+        
+        .btn-3d {
+          transform-style: preserve-3d;
+          transition: all 0.3s ease;
+        }
+        
+        .btn-3d:hover {
+          transform: perspective(1000px) rotateX(-10deg) translateZ(10px) scale(1.05);
+          box-shadow: 0 20px 40px rgba(45, 212, 191, 0.3);
+        }
+        
+        .btn-3d:active {
+          transform: perspective(1000px) rotateX(-5deg) translateZ(5px) scale(1.02);
+        }
+        
+        * {
+          font-family: 'Inter', sans-serif;
+        }
+        
+        h1, h2, h3 {
+          font-family: 'Roboto', sans-serif;
+        }
+      `}</style>
+
       <div className="relative z-10 container mx-auto px-4 py-8 max-w-4xl">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-4xl md:text-6xl font-bold text-gray-800 mb-4 font-inter">
+          <h1 className="text-5xl md:text-7xl font-bold text-blue-800 mb-4 tracking-tight drop-shadow-lg">
             Is It Raining Right Now? 🌧️
           </h1>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+          <p className="text-xl text-gray-700 max-w-2xl mx-auto font-medium">
             Check real-time rainfall status for any city worldwide with live weather data and radar maps
           </p>
         </div>
 
         {/* Search Section */}
-        <Card className="mb-8 shadow-lg border-0 bg-white/80 backdrop-blur-sm">
-          <CardContent className="p-6">
-            <div className="flex flex-col sm:flex-row gap-4">
+        <Card className="mb-8 shadow-2xl border-0 glass-morphism card-3d">
+          <CardContent className="p-8">
+            <div className="flex flex-col sm:flex-row gap-6">
               <div className="flex-1 relative">
-                <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <MapPin className="absolute left-4 top-1/2 transform -translate-y-1/2 text-teal-500 w-6 h-6" />
                 <Input
                   type="text"
                   placeholder="Enter city name (e.g., London, New York, Tokyo)"
                   value={cityName}
                   onChange={(e) => setCityName(e.target.value)}
                   onKeyPress={handleKeyPress}
-                  className="pl-10 h-12 text-lg border-gray-200 focus:border-blue-500 focus:ring-blue-500"
+                  className="pl-12 h-14 text-lg border-2 border-teal-200 focus:border-teal-500 focus:ring-teal-500 rounded-xl glass-morphism"
                   disabled={isLoading}
+                  aria-label="Enter city name to check rainfall"
                 />
               </div>
               <Button
                 onClick={checkWeather}
                 disabled={isLoading || !cityName.trim()}
-                className="h-12 px-8 bg-blue-600 hover:bg-blue-700 text-white font-semibold"
+                className="h-14 px-8 bg-teal-500 hover:bg-teal-600 text-white font-bold text-lg rounded-xl btn-3d transition-all duration-300"
               >
                 {isLoading ? (
                   <>
-                    <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                    <Loader2 className="w-6 h-6 mr-3 candle-flicker" />
                     Checking the skies...
                   </>
                 ) : (
                   <>
-                    <Search className="w-5 h-5 mr-2" />
+                    <Search className="w-6 h-6 mr-3" />
                     Check Weather
                   </>
                 )}
@@ -211,8 +338,8 @@ const Index = () => {
 
         {/* Error Message */}
         {error && (
-          <Alert className="mb-8 border-red-200 bg-red-50">
-            <AlertDescription className="text-red-800 font-medium">
+          <Alert className="mb-8 border-2 border-red-300 bg-red-50 glass-morphism shake">
+            <AlertDescription className="text-red-700 font-semibold text-lg">
               {error}
             </AlertDescription>
           </Alert>
@@ -222,42 +349,42 @@ const Index = () => {
         {weatherData && (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
             {/* Weather Status Card */}
-            <Card className="shadow-lg border-0 bg-white/90 backdrop-blur-sm">
+            <Card className="shadow-2xl border-2 border-teal-200 glass-morphism card-3d">
               <CardHeader>
-                <CardTitle className="flex items-center justify-between">
-                  <span className="text-xl font-bold text-gray-800">
+                <CardTitle className="flex items-center justify-between text-blue-800">
+                  <span className="text-2xl font-bold">
                     {weatherData.city}, {weatherData.country}
                   </span>
-                  <span className="text-3xl font-bold text-blue-600">
+                  <span className="text-4xl font-bold text-teal-600">
                     {weatherData.temperature}°C
                   </span>
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
+                <div className="space-y-6">
                   {(() => {
                     const rainfallInfo = getRainfallStatus(weatherData.rainfall, weatherData.status);
                     const IconComponent = rainfallInfo.icon;
                     return (
-                      <div className="flex items-center space-x-3">
-                        <IconComponent className={`w-8 h-8 ${rainfallInfo.color}`} />
-                        <span className="text-2xl font-bold text-gray-800">
+                      <div className="flex items-center space-x-4">
+                        <IconComponent className={`w-12 h-12 ${rainfallInfo.color} animate-pulse`} />
+                        <span className="text-2xl font-bold text-blue-800">
                           {rainfallInfo.text}
                         </span>
                       </div>
                     );
                   })()}
                   
-                  <div className="grid grid-cols-2 gap-4 pt-4 border-t border-gray-200">
-                    <div>
-                      <p className="text-sm text-gray-500">Weather</p>
-                      <p className="font-semibold text-gray-800 capitalize">
+                  <div className="grid grid-cols-2 gap-6 pt-6 border-t-2 border-teal-100">
+                    <div className="text-center">
+                      <p className="text-sm text-gray-600 font-medium">Weather</p>
+                      <p className="font-bold text-gray-800 capitalize text-lg">
                         {weatherData.description}
                       </p>
                     </div>
-                    <div>
-                      <p className="text-sm text-gray-500">Humidity</p>
-                      <p className="font-semibold text-gray-800">
+                    <div className="text-center">
+                      <p className="text-sm text-gray-600 font-medium">Humidity</p>
+                      <p className="font-bold text-gray-800 text-lg">
                         {weatherData.humidity}%
                       </p>
                     </div>
@@ -267,40 +394,42 @@ const Index = () => {
             </Card>
 
             {/* Radar Map Card */}
-            <Card className="shadow-lg border-0 bg-white/90 backdrop-blur-sm">
+            <Card className="shadow-2xl border-2 border-teal-200 glass-morphism card-3d">
               <CardHeader>
-                <CardTitle className="text-xl font-bold text-gray-800">
+                <CardTitle className="text-2xl font-bold text-blue-800">
                   Precipitation Radar
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 {radarImageUrl ? (
                   <div className="space-y-4">
-                    <img
-                      src={radarImageUrl}
-                      alt="Precipitation radar map"
-                      className="w-full h-64 object-cover rounded-lg border border-gray-200"
-                      onError={(e) => {
-                        const target = e.target as HTMLImageElement;
-                        target.style.display = 'none';
-                        const nextElement = target.nextSibling as HTMLElement;
-                        if (nextElement) {
-                          nextElement.style.display = 'block';
-                        }
-                      }}
-                    />
-                    <div 
-                      className="hidden w-full h-64 bg-gray-100 rounded-lg border border-gray-200 flex items-center justify-center"
-                    >
-                      <p className="text-gray-500">Radar map unavailable</p>
+                    <div className="relative overflow-hidden rounded-xl border-2 border-teal-200 hover:scale-105 transition-transform duration-300">
+                      <img
+                        src={radarImageUrl}
+                        alt="Precipitation radar map"
+                        className="w-full h-64 object-cover fade-in-radar"
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          target.style.display = 'none';
+                          const nextElement = target.nextSibling as HTMLElement;
+                          if (nextElement) {
+                            nextElement.style.display = 'block';
+                          }
+                        }}
+                      />
+                      <div 
+                        className="hidden w-full h-64 bg-gray-100 rounded-xl border-2 border-teal-200 flex items-center justify-center"
+                      >
+                        <p className="text-gray-500 font-medium">Radar map unavailable</p>
+                      </div>
                     </div>
-                    <p className="text-sm text-gray-500 text-center">
+                    <p className="text-sm text-gray-600 text-center font-medium">
                       Live precipitation radar centered on {weatherData.city}
                     </p>
                   </div>
                 ) : (
-                  <div className="w-full h-64 bg-gray-100 rounded-lg border border-gray-200 flex items-center justify-center">
-                    <p className="text-gray-500">Loading radar map...</p>
+                  <div className="w-full h-64 bg-gray-100 rounded-xl border-2 border-teal-200 flex items-center justify-center">
+                    <p className="text-gray-500 font-medium">Loading radar map...</p>
                   </div>
                 )}
               </CardContent>
@@ -314,16 +443,17 @@ const Index = () => {
             <Button
               onClick={resetSearch}
               variant="outline"
-              className="h-12 px-8 bg-white/80 hover:bg-white border-gray-300 hover:border-gray-400"
+              className="h-14 px-8 bg-teal-50 hover:bg-teal-100 border-2 border-teal-300 hover:border-teal-400 text-teal-700 font-bold text-lg rounded-xl btn-3d transition-all duration-300"
             >
+              <RotateCcw className="w-6 h-6 mr-3" />
               Check Another City
             </Button>
           </div>
         )}
 
         {/* Privacy Notice */}
-        <div className="mt-12 text-center">
-          <p className="text-sm text-gray-500 max-w-2xl mx-auto">
+        <div className="mt-16 text-center">
+          <p className="text-sm text-gray-600 max-w-2xl mx-auto font-medium glass-morphism p-4 rounded-xl border border-gray-200" title="Your privacy is protected - no data is stored or tracked">
             🔒 Your city input is used only to fetch weather data and is not stored. 
             This app respects your privacy and doesn't track or save any personal information.
           </p>
