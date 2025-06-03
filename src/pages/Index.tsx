@@ -189,7 +189,7 @@ const Index = () => {
         ))}
       </div>
 
-      <style jsx>{`
+      <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Inter:wght@400;500;600&display=swap');
         
         @keyframes raindrop {
